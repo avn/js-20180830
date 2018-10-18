@@ -1,8 +1,10 @@
 import Component from '../../component.js'
 
+const CLASS_HIDDEN = 'js-hidden';
+
 export default class PhoneCatalog extends Component {
-  constructor({ element, phones, onPhoneSelected }) {
-    super({ element });
+  constructor({element, phones, onPhoneSelected}) {
+    super({element});
 
     this._phones = phones;
     this._onPhoneSelected = onPhoneSelected;
@@ -12,9 +14,11 @@ export default class PhoneCatalog extends Component {
     this._element.addEventListener('click', (event) => {
       this._onPhoneClick(event);
     });
+
+    this._emptyMessageElement = this._element.querySelector('[data-element="empty-message"]');
   }
 
-  _onPhoneClick (event) {
+  _onPhoneClick(event) {
     let phoneElement = event.target.closest('[data-element="phone"]');
 
     if (!phoneElement) {
@@ -24,13 +28,36 @@ export default class PhoneCatalog extends Component {
     this._onPhoneSelected(phoneElement.dataset.phoneId)
   }
 
-  filter(query) {
+  filter(query, serverSide) {
     query = query.toLowerCase();
-    this._phones.forEach(phone => {
 
-      this._element.querySelector(`[data-phone-id="${phone.id}"]`).classList.toggle('js-hidden',  !phone.name.toLowerCase().includes(query));
+    if (serverSide) {
+      this._doFilterOnServerSide(query);
+    } else {
+      this._doFilterOnClientSide(query);
+    }
+  }
+
+  _doFilterOnClientSide(query) {
+    let hiddenPhonesCount = 0;
+    this._phones.forEach(phone => {
+      let isToHide = !phone.name.toLowerCase().includes(query);
+
+      if (isToHide) {
+        hiddenPhonesCount++;
+      }
+
+      this._element.querySelector(`[data-phone-id="${phone.id}"]`)
+      .classList
+      .toggle(CLASS_HIDDEN, isToHide);
 
     });
+
+    this._emptyMessageElement.classList.toggle(CLASS_HIDDEN, hiddenPhonesCount !== this._phones.length);
+  }
+
+  _doFilterOnServerSide(query) {
+    //TODO: send query to server
   }
 
   _render() {
@@ -57,6 +84,7 @@ export default class PhoneCatalog extends Component {
           </li>
         `).join('') }
       </ul>
+      <p data-element="empty-message" class="${CLASS_HIDDEN}">Phones not found</p>
     `;
   }
 }

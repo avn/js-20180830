@@ -6,7 +6,7 @@ export default class Search extends Component {
   constructor({element, onInputComplete}) {
     super({element});
 
-    this._onInputComplete = Wrappers.debounce(onInputComplete, 1000);
+    this._onInputComplete = Wrappers.debounce(onInputComplete, 300);
 
     if (this._element.tagName !== 'INPUT') {
       throw new Error("Search component requires Input element");
