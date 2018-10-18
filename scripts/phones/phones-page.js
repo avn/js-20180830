@@ -1,6 +1,7 @@
 import PhoneCatalog from './components/phone-catalog.js';
 import PhoneViewer from './components/phone-viewer.js';
 import PhoneService from './services/phone-service.js';
+import Search from "../common/components/search.js";
 
 export default class PhonesPage {
   constructor({ element }) {
@@ -10,6 +11,7 @@ export default class PhonesPage {
 
     this._initCatalog();
     this._initViewer();
+    this._initSearch();
   }
 
   _initCatalog () {
@@ -32,6 +34,15 @@ export default class PhonesPage {
     })
   }
 
+  _initSearch() {
+    new Search({
+      element: this._element.querySelector('[data-component="phone-search"]'),
+      onInputComplete: (query) => {
+        this._catalog.filter(query);
+      }
+    });
+  }
+
   _render() {
     this._element.innerHTML = `
       <div class="row">
@@ -41,7 +52,7 @@ export default class PhonesPage {
           <section>
             <p>
               Search:
-              <input>
+              <input data-component="phone-search"/>
             </p>
     
             <p>

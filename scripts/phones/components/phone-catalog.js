@@ -24,6 +24,15 @@ export default class PhoneCatalog extends Component {
     this._onPhoneSelected(phoneElement.dataset.phoneId)
   }
 
+  filter(query) {
+    query = query.toLowerCase();
+    this._phones.forEach(phone => {
+
+      this._element.querySelector(`[data-phone-id="${phone.id}"]`).classList.toggle('js-hidden',  !phone.name.toLowerCase().includes(query));
+
+    });
+  }
+
   _render() {
     this._element.innerHTML = `
       <ul class="phones">
