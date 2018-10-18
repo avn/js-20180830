@@ -13,7 +13,7 @@ export default class Search extends Component {
     }
 
     this._element.addEventListener('keyup', (event) => {
-      this._handleInputChange(event.target.value);
+      this._handleInputChange(event.target.value, event.target);
     })
   }
 

@@ -2,6 +2,7 @@ import PhoneCatalog from './components/phone-catalog.js';
 import PhoneViewer from './components/phone-viewer.js';
 import PhoneService from './services/phone-service.js';
 import Search from "../common/components/search.js";
+import ChoiceList from "../common/components/choice-list.js";
 
 export default class PhonesPage {
   constructor({ element }) {
@@ -12,6 +13,7 @@ export default class PhonesPage {
     this._initCatalog();
     this._initViewer();
     this._initSearch();
+    this._initSorting();
   }
 
   _initCatalog () {
@@ -43,6 +45,19 @@ export default class PhonesPage {
     });
   }
 
+  _initSorting() {
+    new ChoiceList({
+      element: this._element.querySelector('[data-component="phone-sort"]'),
+      choiceList: {
+        name: 'Alphabetical',
+        age: 'Newest',
+      },
+      onValueChanged: (fieldName) => {
+        this._catalog.sort(fieldName);
+      }
+    });
+  }
+
   _render() {
     this._element.innerHTML = `
       <div class="row">
@@ -57,9 +72,7 @@ export default class PhonesPage {
     
             <p>
               Sort by:
-              <select>
-                <option value="name">Alphabetical</option>
-                <option value="age">Newest</option>
+              <select data-component="phone-sort">
               </select>
             </p>
           </section>

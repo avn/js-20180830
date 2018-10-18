@@ -1,4 +1,6 @@
 import Component from '../../component.js'
+import Collections from "../../common/utils/collections.js";
+import Wrappers from "../../common/utils/wrappers.js";
 
 const CLASS_HIDDEN = 'js-hidden';
 
@@ -8,6 +10,7 @@ export default class PhoneCatalog extends Component {
 
     this._phones = phones;
     this._onPhoneSelected = onPhoneSelected;
+    this._getComparator = Wrappers.cacheble(Collections.createComparator);
 
     this._render();
 
@@ -15,7 +18,8 @@ export default class PhoneCatalog extends Component {
       this._onPhoneClick(event);
     });
 
-    this._emptyMessageElement = this._element.querySelector('[data-element="empty-message"]');
+    this._emptyMessageElement = this._element.querySelector(
+        '[data-element="empty-message"]');
   }
 
   _onPhoneClick(event) {
@@ -53,11 +57,35 @@ export default class PhoneCatalog extends Component {
 
     });
 
-    this._emptyMessageElement.classList.toggle(CLASS_HIDDEN, hiddenPhonesCount !== this._phones.length);
+    this._emptyMessageElement.classList.toggle(CLASS_HIDDEN,
+        hiddenPhonesCount !== this._phones.length);
   }
 
   _doFilterOnServerSide(query) {
     //TODO: send query to server
+  }
+
+  sort(fieldName, serverSide) {
+    if (serverSide) {
+      this._doSortOnServerSide(fieldName);
+    } else {
+      this._doSortOnClientSide(fieldName);
+    }
+  }
+
+  _doSortOnClientSide(fieldName) {
+
+    let ul = this._element.firstElementChild;
+
+    this._phones
+    .sort(this._getComparator(fieldName))
+    .forEach((phone) => {
+      ul.appendChild(this._element.querySelector(`[data-phone-id="${phone.id}"]`));
+    });
+  }
+
+  _doSortOnServerSide(fieldName) {
+    //TODO: send sorting query to server
   }
 
   _render() {
