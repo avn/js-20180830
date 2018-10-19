@@ -224,8 +224,12 @@ const PhoneService = {
     return phonesFromServer;
   },
 
-  getPhone(phoneId) {
+  getPhoneDetails(phoneId) {
     return phoneDetails;
+  },
+
+  getPhone(phoneId) {
+    return this.getPhones().find(phone => phone.id === phoneId);
   }
 };
 

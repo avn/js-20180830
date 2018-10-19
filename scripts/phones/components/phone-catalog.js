@@ -1,25 +1,33 @@
 import Component from '../../component.js'
 import Collections from "../../common/utils/collections.js";
 import Wrappers from "../../common/utils/wrappers.js";
-
 const CLASS_HIDDEN = 'js-hidden';
 
-export default class PhoneCatalog extends Component {
-  constructor({element, phones, onPhoneSelected}) {
-    super({element});
 
+export default class PhoneCatalog extends Component {
+  constructor({element, phones, onShowPhoneDetailsClick, onAddPhoneToShoppingCardClick}) {
+    super({element});
     this._phones = phones;
-    this._onPhoneSelected = onPhoneSelected;
+    this._onShowPhoneDetailsClick = onShowPhoneDetailsClick;
+    this._onAddPhoneToShoppingCardClick = onAddPhoneToShoppingCardClick;
     this._getComparator = Wrappers.cacheble(Collections.createComparator);
 
     this._render();
+
+    this._emptyMessageElement = this._element.querySelector(
+        '[data-element="empty-message"]');
 
     this._element.addEventListener('click', (event) => {
       this._onPhoneClick(event);
     });
 
-    this._emptyMessageElement = this._element.querySelector(
-        '[data-element="empty-message"]');
+    document.addEventListener('shoppingCardPhoneAdded', (event) => {
+      this._disableAddPhoneToShoppingCardButton(event.detail.phoneId);
+    });
+
+    document.addEventListener('shoppingCardPhoneRemoved', (event) => {
+      this._enableAddPhoneToShoppingCardButton(event.detail.phoneId);
+    });
   }
 
   _onPhoneClick(event) {
@@ -29,7 +37,34 @@ export default class PhoneCatalog extends Component {
       return;
     }
 
-    this._onPhoneSelected(phoneElement.dataset.phoneId)
+    this._handleShowPhoneDetailsClick(event, phoneElement);
+    this._addPhoneToShoppingCardClick(event, phoneElement);
+  }
+
+  _handleShowPhoneDetailsClick(event, phoneElement) {
+    let phoneDetailsLinkElement = event.target.closest('[data-element="phone-details-link"]');
+    if (phoneDetailsLinkElement) {
+      event.preventDefault();
+      this._onShowPhoneDetailsClick(phoneElement.dataset.phoneId);
+    }
+  }
+
+  _addPhoneToShoppingCardClick(event, phoneElement) {
+    let phoneAddButtonElement = event.target.closest('[data-element="phone-add-to-shopping-card-button"]');
+    if (phoneAddButtonElement) {
+      this._onAddPhoneToShoppingCardClick(phoneElement.dataset.phoneId);
+    }
+  }
+
+  _disableAddPhoneToShoppingCardButton(phoneId) {
+    console.log('disable:' +phoneId);
+    this._element.querySelector(`[data-phone-id="${phoneId}"] [data-element="phone-add-to-shopping-card-button"]`).classList.toggle(CLASS_HIDDEN, true);
+  }
+
+
+  _enableAddPhoneToShoppingCardButton(phoneId) {
+    console.log('enable:' +phoneId);
+    this._element.querySelector(`[data-phone-id="${phoneId}"] [data-element="phone-add-to-shopping-card-button"]`).classList.toggle(CLASS_HIDDEN, false);
   }
 
   filter(query, serverSide) {
@@ -97,17 +132,17 @@ export default class PhoneCatalog extends Component {
             data-element="phone"
             data-phone-id="${ phone.id }"
           >
-            <a href="#!/phones/${ phone.id }" class="thumb">
+            <a href="#!/phones/${ phone.id }" class="thumb" data-element="phone-details-link">
               <img alt="${ phone.name }" src="${ phone.imageUrl }">
             </a>
   
-            <div class="phones__btn-buy-wrapper">
+            <div data-element="phone-add-to-shopping-card-button" class="phones__btn-buy-wrapper">
               <a class="btn btn-success">
                 Add
               </a>
             </div>
   
-            <a href="#!/phones/${ phone.id }">${ phone.name }</a>
+            <a href="#!/phones/${ phone.id }" data-element="phone-details-link">${ phone.name }</a>
             <p>${ phone.snippet }</p>
           </li>
         `).join('') }

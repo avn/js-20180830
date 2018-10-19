@@ -3,6 +3,7 @@ import PhoneViewer from './components/phone-viewer.js';
 import PhoneService from './services/phone-service.js';
 import Search from "../common/components/search.js";
 import ChoiceList from "../common/components/choice-list.js";
+import PhoneShoppingCard from "./components/phone-shopping-card.js";
 
 export default class PhonesPage {
   constructor({ element }) {
@@ -10,10 +11,12 @@ export default class PhonesPage {
 
     this._render();
 
+    this._initShoppingCard();
     this._initCatalog();
     this._initViewer();
     this._initSearch();
     this._initSorting();
+
   }
 
   _initCatalog () {
@@ -21,12 +24,16 @@ export default class PhonesPage {
       element: this._element.querySelector('[data-component="phone-catalog"]'),
       phones: PhoneService.getPhones(),
 
-      onPhoneSelected: (phoneId) => {
+      onShowPhoneDetailsClick: (phoneId) => {
         let phoneDetails = PhoneService.getPhone(phoneId);
 
         this._catalog.hide();
         this._viewer.show(phoneDetails);
       },
+
+      onAddPhoneToShoppingCardClick: (phoneId) => {
+        this._shoppingCard.addPhone(phoneId);
+      }
     });
   }
 
@@ -58,6 +65,12 @@ export default class PhonesPage {
     });
   }
 
+  _initShoppingCard() {
+    this._shoppingCard = new PhoneShoppingCard({
+      element: this._element.querySelector('[data-component="phone-shopping-card"]')
+    });
+  }
+
   _render() {
     this._element.innerHTML = `
       <div class="row">
@@ -77,13 +90,7 @@ export default class PhonesPage {
             </p>
           </section>
     
-          <section>
-            <p>Shopping Cart</p>
-            <ul>
-              <li>Phone 1</li>
-              <li>Phone 2</li>
-              <li>Phone 3</li>
-            </ul>
+          <section data-component="phone-shopping-card">
           </section>
         </div>
     
